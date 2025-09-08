@@ -1,75 +1,47 @@
-import React, { useContext, useState } from 'react';
-import { UsergroupAddOutlined, HomeOutlined, SettingOutlined } from '@ant-design/icons';
-import { Menu } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/auth.context';
+import { useContext, useMemo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/auth.context.jsx";
+import { Button, Menu } from "antd";
 
 const Header = () => {
-  const navigate = useNavigate();
   const { auth, setAuth } = useContext(AuthContext);
-  console.log(">>> check auth: ", auth);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const items = [
-    {
-      label: <Link to={"/"}>Home Page</Link>,
-      key: 'home',
-      icon: <HomeOutlined />,
-    },
-    ...(auth.isAuthenticated ? [
-      {
-        label: <Link to={"/user"}>Users</Link>,
-        key: 'user',
-        icon: <UsergroupAddOutlined />,
-      }
-    ] : []),
-    {
-      label: `Welcome ${auth?.user?.email ?? ""}`,
-      key: 'SubMenu',
-      icon: <SettingOutlined />,
-      children: [
-        ...(auth.isAuthenticated ? [
-          {
-            label: (
-              <span
-                onClick={() => {
-                  localStorage.clear("access_token");
-                  setCurrent("home");
-                  setAuth({
-                    isAuthenticated: false,
-                    user: {
-                      email: "",
-                      name: ""
-                    },
-                  });
-                  navigate("/");
-                }}
-              >
-                Đăng xuất
-              </span>
-            ),
-            key: 'logout',
-          }
-        ] : [
-          {
-            label: <Link to={"/login"}>Đăng nhập</Link>,
-            key: 'login',
-          },
-          {
-            label: <Link to={"/register"}>Đăng ký</Link>,
-            key: 'register',
-          }
-        ]),
-      ],
-    },
-  ];
+  const current = useMemo(() => {
+    if (location.pathname.startsWith("/user")) return "user";
+    if (location.pathname.startsWith("/products")) return "products";
+    return "home";
+  }, [location.pathname]);
 
-  const [current, setCurrent] = useState('home');
-  const onClick = (e) => {
-    console.log('click ', e);
-    setCurrent(e.key);
+  const onLogout = () => {
+    localStorage.removeItem("access_token");
+    setAuth({ isAuthenticated: false, user: { email: "", name: "" } });
+    navigate("/");
   };
 
-  return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />;
+  return (
+    <div style={{ borderBottom: "1px solid #eee", marginBottom: 12 }}>
+      <div className="container" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <Menu mode="horizontal" selectedKeys={[current]} style={{ flex: 1 }}>
+          <Menu.Item key="home"><Link to="/">Home</Link></Menu.Item>
+          <Menu.Item key="products"><Link to="/products">Products</Link></Menu.Item>
+          <Menu.Item key="user"><Link to="/user">Users</Link></Menu.Item>
+        </Menu>
+        {auth?.isAuthenticated ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span>👋 {auth?.user?.name || auth?.user?.email}</span>
+            <Button onClick={onLogout}>Logout</Button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Header;
