@@ -1,7 +1,7 @@
-// src/routes/api.js
+// routes/api.js
 const express = require("express");
+const routerAPI = express.Router();
 
-// Controllers
 const {
   createUser,
   handleLogin,
@@ -14,34 +14,32 @@ const {
 const {
   getCategories,
   getProductsPaged,
-  getProductsCursor,
 } = require("../controllers/productController");
 
-// Middlewares
+const { searchProducts, reindexAllProducts } = require("../controllers/searchController");
+
 const auth = require("../middleware/auth");
 const delay = require("../middleware/delay");
 
-const routerAPI = express.Router();
+/* ---------- Public ---------- */
+routerAPI.get("/", (req, res) => res.status(200).json("Hello world api"));
 
-/* ---------- Public routes (no JWT required) ---------- */
-routerAPI.get("/", (req, res) => {
-  return res.status(200).json("Hello world api");
-});
-
-// Auth
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
-
-// Password reset (stateless)
 routerAPI.post("/forgot-password", forgotPassword);
 routerAPI.post("/reset-password", resetPassword);
 
-// Catalog & Products
 routerAPI.get("/categories", getCategories);
-routerAPI.get("/products", getProductsPaged); // ?categoryId=&page=&limit=
-/* ---------- Protected routes (JWT required) ---------- */
-routerAPI.use(auth);
+routerAPI.get("/products", getProductsPaged);
 
+// 🔎 Fuzzy Search + Filters (Elasticsearch)
+routerAPI.get("/search/products", searchProducts);
+
+// (tuỳ chọn) reindex toàn bộ dữ liệu sang ES
+routerAPI.post("/search/reindex", reindexAllProducts);
+
+/* ---------- Protected ---------- */
+routerAPI.use(auth);
 routerAPI.get("/user", getUser);
 routerAPI.get("/account", delay, getAccount);
 

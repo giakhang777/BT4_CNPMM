@@ -12,42 +12,33 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       const res = await forgotPasswordApi(email);
-
       if (res?.EC === 0) {
-        // Thông báo chung
         notification.success({
           message: "FORGOT PASSWORD",
-          description: res?.EM || "If this email exists, a reset link has been sent.",
+          description:
+            res?.EM || "If this email exists, a reset link has been sent.",
         });
-
-        // DEV: backend trả về DT.resetURL -> điều hướng luôn
         if (res?.DT?.resetURL) {
           try {
             const url = new URL(res.DT.resetURL);
-            // Tùy backend, resetURL dạng: http://localhost:5173/reset-password?token=...&email=...
             navigate(`${url.pathname}${url.search}`, { replace: true });
-          } catch (e) {
-            // Fallback: parse thủ công nếu cần
+          } catch {
             const mToken = res.DT.resetURL.match(/token=([^&]+)/);
             const mEmail = res.DT.resetURL.match(/email=([^&]+)/);
             if (mToken && mEmail) {
-              navigate(`/reset-password?token=${mToken[1]}&email=${mEmail[1]}`, { replace: true });
+              navigate(
+                `/reset-password?token=${mToken[1]}&email=${mEmail[1]}`,
+                { replace: true }
+              );
             }
           }
         }
-        // PROD: không có resetURL → người dùng mở link trong email
       } else {
         notification.error({
           message: "FORGOT PASSWORD",
           description: res?.EM || "Request failed",
         });
       }
-    } catch (err) {
-      notification.error({
-        message: "FORGOT PASSWORD",
-        description: err?.message || "Network/CORS error",
-      });
-      console.error("forgot-password error:", err);
     } finally {
       setLoading(false);
     }
@@ -72,7 +63,9 @@ export default function ForgotPasswordPage() {
               </Button>
             </Form.Item>
           </Form>
-          <Link to="/"><ArrowLeftOutlined /> Quay lại trang chủ</Link>
+          <Link to="/">
+            <ArrowLeftOutlined /> Quay lại trang chủ
+          </Link>
         </fieldset>
       </Col>
     </Row>

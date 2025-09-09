@@ -1,12 +1,11 @@
 import { Outlet } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { Spin } from "antd";
-
 import Header from "./components/layout/header.jsx";
 import axios from "./util/axios.customize.js";
 import { AuthContext } from "./components/context/auth.context.jsx";
 
-function App() {
+export default function App() {
   const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
 
   useEffect(() => {
@@ -29,20 +28,18 @@ function App() {
     return () => { mounted = false; };
   }, [setAuth, setAppLoading]);
 
+  if (appLoading) {
+    return (
+      <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Spin />
+      </div>
+    );
+  }
+
   return (
-    <div>
-      {appLoading ? (
-        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-          <Spin />
-        </div>
-      ) : (
-        <>
-          <Header />
-          <Outlet />
-        </>
-      )}
-    </div>
+    <>
+      <Header />
+      <Outlet />
+    </>
   );
 }
-
-export default App;

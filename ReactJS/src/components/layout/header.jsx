@@ -1,16 +1,17 @@
 import { useContext, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, Button } from "antd";
 import { AuthContext } from "../context/auth.context.jsx";
-import { Button, Menu } from "antd";
 
-const Header = () => {
+export default function Header() {
   const { auth, setAuth } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
 
   const current = useMemo(() => {
-    if (location.pathname.startsWith("/user")) return "user";
     if (location.pathname.startsWith("/products")) return "products";
+    if (location.pathname.startsWith("/search")) return "search";
+    if (location.pathname.startsWith("/user")) return "user";
     return "home";
   }, [location.pathname]);
 
@@ -22,11 +23,23 @@ const Header = () => {
 
   return (
     <div style={{ borderBottom: "1px solid #eee", marginBottom: 12 }}>
-      <div className="container" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div
+        className="container"
+        style={{ display: "flex", alignItems: "center", gap: 16 }}
+      >
         <Menu mode="horizontal" selectedKeys={[current]} style={{ flex: 1 }}>
-          <Menu.Item key="home"><Link to="/">Home</Link></Menu.Item>
-          <Menu.Item key="products"><Link to="/products">Products</Link></Menu.Item>
-          <Menu.Item key="user"><Link to="/user">Users</Link></Menu.Item>
+          <Menu.Item key="home">
+            <Link to="/">Home</Link>
+          </Menu.Item>
+          <Menu.Item key="products">
+            <Link to="/products">Products</Link>
+          </Menu.Item>
+          <Menu.Item key="search">
+            <Link to="/search">Search</Link>
+          </Menu.Item>
+          <Menu.Item key="user">
+            <Link to="/user">Users</Link>
+          </Menu.Item>
         </Menu>
         {auth?.isAuthenticated ? (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -42,6 +55,4 @@ const Header = () => {
       </div>
     </div>
   );
-};
-
-export default Header;
+}

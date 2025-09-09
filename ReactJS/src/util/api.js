@@ -1,54 +1,38 @@
 import axios from './axios.customize';
 
-const createUserApi = (name, email, password) => {
-  const URL_API = "/v1/api/register";
-  const data = { name, email, password };
-  return axios.post(URL_API, data);
-};
+// Auth/User
+export const createUserApi = (name, email, password) =>
+  axios.post("/v1/api/register", { name, email, password });
 
-const loginApi = (email, password) => {
-  const URL_API = "/v1/api/login";
-  const data = { email, password };
-  return axios.post(URL_API, data);
-};
+export const loginApi = (email, password) =>
+  axios.post("/v1/api/login", { email, password });
 
-const getUserApi = () => {
-  const URL_API = "/v1/api/user";
-  return axios.get(URL_API);
-};
+export const getUserApi = () => axios.get("/v1/api/user");
 
-const forgotPasswordApi = (email) => {
-  const URL_API = "/v1/api/forgot-password";
-  const data = { email };
-  return axios.post(URL_API, data);
-};
+// Password reset
+export const forgotPasswordApi = (email) =>
+  axios.post("/v1/api/forgot-password", { email });
 
-const resetPasswordApi = (email, token, newPassword) => {
-  const URL_API = "/v1/api/reset-password";
-  const data = { email, token, newPassword };
-  return axios.post(URL_API, data);
-};
+export const resetPasswordApi = (email, token, newPassword) =>
+  axios.post("/v1/api/reset-password", { email, token, newPassword });
 
-const getCategoriesApi = () => {
-  const URL_API = "/v1/api/categories";
-  return axios.get(URL_API);
-};
+// Catalog
+export const getCategoriesApi = () => axios.get("/v1/api/categories");
 
-const getProductsPagedApi = (categoryId, page = 1, limit = 12) => {
-  const URL_API = "/v1/api/products";
+// Products (paged)
+export const getProductsPagedApi = (categoryId, page = 1, limit = 12) => {
   const params = new URLSearchParams();
   if (categoryId) params.set("categoryId", categoryId);
   params.set("page", page);
   params.set("limit", limit);
-  return axios.get(`${URL_API}?${params.toString()}`);
+  return axios.get(`/v1/api/products?${params.toString()}`);
 };
 
-export {
-  createUserApi,
-  loginApi,
-  getUserApi,
-  forgotPasswordApi,
-  resetPasswordApi,
-  getCategoriesApi,
-  getProductsPagedApi,
+// Fuzzy search + filters (Elasticsearch)
+export const searchProductsApi = (params = {}) => {
+  const sp = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && String(v).length) sp.set(k, v);
+  });
+  return axios.get(`/v1/api/search/products?${sp.toString()}`);
 };
